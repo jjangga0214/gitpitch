@@ -39,6 +39,7 @@ public final class Dependencies {
     private final String jqueryVersion;
     private final String fontawesomeVersion;
     private final String octiconsVersion;
+    private final String magiccheckVersion;
     private final String highlightjsVersion;
     private final Boolean highlightPluginEnabled;
 
@@ -51,6 +52,7 @@ public final class Dependencies {
         this.jqueryVersion = cfg.getString("gitpitch.dependency.jquery");
         this.fontawesomeVersion = cfg.getString("gitpitch.dependency.fontawesome");
         this.octiconsVersion = cfg.getString("gitpitch.dependency.octicons");
+        this.magiccheckVersion = cfg.getString("gitpitch.dependency.magiccheck");
         this.highlightjsVersion = cfg.getString("gitpitch.dependency.highlightjs");
         this.highlightPluginEnabled =
             cfg.getBoolean("gitpitch.dependency.highlight.plugin", false);
@@ -75,6 +77,10 @@ public final class Dependencies {
 
     public String octicons(boolean offline) {
         return build(offline, OCTICONS, octiconsVersion);
+    }
+
+    public String magiccheck(boolean offline) {
+        return build(offline, MAGICCHECK, magiccheckVersion);
     }
 
     public String highlightjs(boolean offline) {
@@ -118,6 +124,7 @@ public final class Dependencies {
     private static final String FONTAWE   = "/font-awesome/";
     private static final String OCTICONS  = "/octicons/";
     private static final String HIGHLIGHT = "/highlight.js/";
+    private static final String MAGICCHECK = "/magiccheck/";
 
     private static final String DEFAULT_CDN = "/assets/libs";
 }

@@ -128,7 +128,7 @@ public class PitchController extends Controller {
     /*
      * Landing builds and renders a GitPitch repo landing page.
      */
-    public CompletionStage<Result> landing(String user,
+    public CompletionStage<Result> Xlanding(String user,
                                            String repo,
                                            String branch,
                                            String grs,
@@ -192,81 +192,200 @@ public class PitchController extends Controller {
     } // landing action
 
     /*
-     * Slideshow builds and renders a GitPitch slideshow page.
+     * Landing builds and renders a GitPitch repo landing page.
      */
-    public CompletionStage<Result> slideshow(String grs,
-                                             String user,
-                                             String repo,
-                                             String branch,
-                                             String theme,
-                                             String pitchme,
-                                             String notes,
-                                             String fragments,
-                                             String offline,
-                                             String webprint) {
+    public CompletionStage<Result> landing(String user,
+                                           String repo,
+                                           String branch,
+                                           String grs,
+                                           String theme,
+                                           String pitchme,
+                                           String notes,
+                                           String fragments,
+                                           String offline,
+                                           String webprint) {
 
         PitchParams pp =
             PitchParams.build(grsOnCall(grs),
                     user, repo, branch, theme, pitchme, notes);
-        boolean printing =
+        boolean serverPrinting =
                 (fragments == null) ? false : !Boolean.parseBoolean(fragments);
         boolean isOffline =
                 (offline == null) ? false : Boolean.parseBoolean(offline);
         boolean webPrinting =
                 (webprint == null) ? false : Boolean.parseBoolean(webprint);
 
+        Optional<GitRepoModel> grmo = pitchService.cachedRepo(pp);
         Optional<SlideshowModel> ssmo = pitchService.cachedYAML(pp);
 
-        if (ssmo.isPresent()) {
+        log.debug("landing: pp={}", pp);
+        log.debug("landing: pitchme={}, offline={}, serverPrinting={}, webPrinting={}", pitchme, isOffline, serverPrinting, webPrinting);
 
-            if (printing)
-                log.info("slideshow: [ cached, printg ] {}", pp);
-            else if (isOffline)
-                log.info("slideshow: [ cached, offlne ] {}", pp);
+        if (grmo.isPresent() && ssmo.isPresent()) {
+
+            if (isOffline)
+                log.info("landing:   [ cached, offlne ] {}", pp);
             else
-                log.info("slideshow: [ cached, online ] {}", pp);
+                log.info("landing:   [ cached, online ] {}", pp);
 
+            GitRepoModel grm = grmo.get();
+            GitRepoRenderer rndr =
+                GitRepoRenderer.build(pp, grm, cfg, grsManager.listGRS());
             SlideshowModel ssm = ssmo.get();
             /*
              * Clone cached SlideshowModel in order to adjust for any
              * changes on the current PitchParams, such as {theme}.
              */
             ssm = ssm.clone(pp);
+
             return CompletableFuture.completedFuture(
                     ok(com.gitpitch.views.html.Slideshow.render(ssm,
-                            deps, printing, isOffline, webPrinting)));
+                            deps, isOffline, serverPrinting, webPrinting)));
 
         } else {
 
             return CompletableFuture.supplyAsync(() -> {
 
-                return pitchService.fetchYAML(pp);
+                return pitchService.fetchRepo(pp);
 
             }, frontEndThreads.POOL)
-                    .thenApply(fetched -> {
+                    .thenApply(repoFetched -> {
 
-                        if (printing)
-                            log.info("slideshow: [ fetchd, printg ] {}", pp);
-                        if (isOffline)
-                            log.info("slideshow: [ fetchd, offlne ] {}", pp);
-                        else
-                            log.info("slideshow: [ fetchd, online ] {}", pp);
+                        GitRepoRenderer rndr =
+                            GitRepoRenderer.build(pp, repoFetched, cfg,
+                                    grsManager.listGRS());
 
-                        return ok(com.gitpitch.views.html.Slideshow.render(fetched,
-                                deps, printing, isOffline, webPrinting));
-                    });
-        }
+                        if (rndr.isValid()) {
+                            if (isOffline)
+                                log.info("landing:   [ fetchd, offlne ] {}", pp);
+                            else
+                                log.info("landing:   [ fetchd, online ] {}", pp);
+                        } else {
+                            if (isOffline)
+                                log.info("landing:   [ notfnd, offlne ] {}", pp);
+                            else
+                                log.info("landing:   [ notfnd, online ] {}", pp);
+                        }
 
-    } // slideshow action
+                        // Optional<SlideshowModel> ssmo = pitchService.cachedYAML(pp);
 
-    /*
-     * Markdown processes and renders PITCHME.md markdown.
-     */
-    public CompletionStage<Result> markdown(String grs,
-                                            String user,
-                                            String repo,
-                                            String branch,
-                                            String pitchme) {
+                        if (ssmo.isPresent()) {
+
+                            if (webPrinting)
+                                log.info("slideshow: [ cached, printg ] {}", pp);
+                            else if (isOffline)
+                                log.info("slideshow: [ cached, offlne ] {}", pp);
+                            else
+                                log.info("slideshow: [ cached, online ] {}", pp);
+
+                            SlideshowModel ssm = ssmo.get();
+                            /*
+                             * Clone cached SlideshowModel in order to adjust for any
+                             * changes on the current PitchParams, such as {theme}.
+                             */
+                            ssm = ssm.clone(pp);
+                            // return CompletableFuture.completedFuture(
+                                    // ok(com.gitpitch.views.html.Slideshow.render(ssm,
+                                            // deps, webPrinting, isOffline, webPrinting)));
+                            return ok(com.gitpitch.views.html.Slideshow.render(ssm,
+                                            deps, isOffline, serverPrinting, webPrinting));
+
+                        } else {
+
+                            SlideshowModel ssm = pitchService.fetchYAML(pp);
+
+                            if (webPrinting)
+                                log.info("slideshow: [ fetchd, printg ] {}", pp);
+                            if (isOffline)
+                                log.info("slideshow: [ fetchd, offlne ] {}", pp);
+                            else
+                                log.info("slideshow: [ fetchd, online ] {}", pp);
+
+                            return ok(com.gitpitch.views.html.Slideshow.render(ssm,
+                                    deps, isOffline, serverPrinting, webPrinting));
+                        }
+
+                  });
+      }
+
+  } // landing action
+
+  /*
+   * Slideshow builds and renders a GitPitch slideshow page.
+   */
+  public CompletionStage<Result> slideshow(String grs,
+                                           String user,
+                                           String repo,
+                                           String branch,
+                                           String theme,
+                                           String pitchme,
+                                           String notes,
+                                           String fragments,
+                                           String offline,
+                                           String webprint) {
+
+      PitchParams pp =
+          PitchParams.build(grsOnCall(grs),
+                  user, repo, branch, theme, pitchme, notes);
+      boolean printing =
+              (fragments == null) ? false : !Boolean.parseBoolean(fragments);
+      boolean isOffline =
+              (offline == null) ? false : Boolean.parseBoolean(offline);
+      boolean webPrinting =
+              (webprint == null) ? false : Boolean.parseBoolean(webprint);
+
+      Optional<SlideshowModel> ssmo = pitchService.cachedYAML(pp);
+
+      if (ssmo.isPresent()) {
+
+          if (printing)
+              log.info("slideshow: [ cached, printg ] {}", pp);
+          else if (isOffline)
+              log.info("slideshow: [ cached, offlne ] {}", pp);
+          else
+              log.info("slideshow: [ cached, online ] {}", pp);
+
+          SlideshowModel ssm = ssmo.get();
+          /*
+           * Clone cached SlideshowModel in order to adjust for any
+           * changes on the current PitchParams, such as {theme}.
+           */
+          ssm = ssm.clone(pp);
+          return CompletableFuture.completedFuture(
+                  ok(com.gitpitch.views.html.Slideshow.render(ssm,
+                          deps, printing, isOffline, webPrinting)));
+
+      } else {
+
+          return CompletableFuture.supplyAsync(() -> {
+
+              return pitchService.fetchYAML(pp);
+
+          }, frontEndThreads.POOL)
+                  .thenApply(fetched -> {
+
+                      if (printing)
+                          log.info("slideshow: [ fetchd, printg ] {}", pp);
+                      if (isOffline)
+                          log.info("slideshow: [ fetchd, offlne ] {}", pp);
+                      else
+                          log.info("slideshow: [ fetchd, online ] {}", pp);
+
+                      return ok(com.gitpitch.views.html.Slideshow.render(fetched,
+                              deps, printing, isOffline, webPrinting));
+                  });
+      }
+
+  } // slideshow action
+
+  /*
+   * Markdown processes and renders PITCHME.md markdown.
+   */
+  public CompletionStage<Result> markdown(String grs,
+                                          String user,
+                                          String repo,
+                                          String branch,
+                                          String pitchme) {
 
         PitchParams pp =
             PitchParams.build(grsOnCall(grs),
@@ -306,6 +425,93 @@ public class PitchController extends Controller {
         }
 
     } // markdown action
+
+    /*
+     * Home generates presentation home side-panel.
+     */
+    public CompletionStage<Result> home(String grs,
+                                        String user,
+                                        String repo,
+                                        String branch,
+                                        String theme,
+                                        String pitchme,
+                                        String offline) {
+
+        PitchParams pp =
+            PitchParams.build(grsOnCall(grs),
+                    user, repo, branch, theme, pitchme);
+
+        boolean isOffline =
+                (offline == null) ? false : Boolean.parseBoolean(offline);
+
+        Optional<GitRepoModel> grmo = pitchService.cachedRepo(pp);
+
+        GitRepoModel grm = grmo.orElse(null);
+        GitRepoRenderer rndr =
+                GitRepoRenderer.build(pp, grm, cfg, grsManager.listGRS());
+
+        return CompletableFuture.completedFuture(
+                ok(com.gitpitch.views.html.Home.render(rndr, deps, isOffline)));
+
+    } // home action
+
+    /*
+     * Git generates presentation git (grs) side-panel.
+     */
+    public CompletionStage<Result> git(String grs,
+                                       String user,
+                                       String repo,
+                                       String branch,
+                                       String theme,
+                                       String pitchme,
+                                       String offline) {
+
+        PitchParams pp =
+            PitchParams.build(grsOnCall(grs),
+                    user, repo, branch, theme, pitchme);
+
+        boolean isOffline =
+                (offline == null) ? false : Boolean.parseBoolean(offline);
+
+        Optional<GitRepoModel> grmo = pitchService.cachedRepo(pp);
+
+        GitRepoModel grm = grmo.orElse(null);
+        GitRepoRenderer rndr =
+                GitRepoRenderer.build(pp, grm, cfg, grsManager.listGRS());
+
+        return CompletableFuture.completedFuture(
+                ok(com.gitpitch.views.html.Git.render(rndr, deps, isOffline)));
+
+    } // git action
+
+    /*
+     * Themes generates presentation themes side-panel.
+     */
+    public CompletionStage<Result> themes(String grs,
+                                          String user,
+                                          String repo,
+                                          String branch,
+                                          String theme,
+                                          String pitchme,
+                                          String offline) {
+
+        PitchParams pp =
+            PitchParams.build(grsOnCall(grs),
+                    user, repo, branch, theme, pitchme);
+
+        boolean isOffline =
+                (offline == null) ? false : Boolean.parseBoolean(offline);
+
+        Optional<GitRepoModel> grmo = pitchService.cachedRepo(pp);
+
+        GitRepoModel grm = grmo.orElse(null);
+        GitRepoRenderer rndr =
+                GitRepoRenderer.build(pp, grm, cfg, grsManager.listGRS());
+
+        return CompletableFuture.completedFuture(
+                ok(com.gitpitch.views.html.Themes.render(rndr, deps, isOffline)));
+
+    } // themes action
 
     /*
      * Print generates and renders PITCHME.pdf.

@@ -125,7 +125,12 @@ public class GISTService {
                                   .append(MarkdownModel.MD_SPACER);
 
         if(slideTitle != null) {
+
             slide = slide.append(MarkdownModel.MD_SPACER)
+                         .append("<span class='menu-title' style='display: none'>")
+                         .append(slideTitle)
+                         .append("</span>")
+                         .append(MarkdownModel.MD_SPACER)
                          .append(slideTitle)
                          .append(MarkdownModel.MD_SPACER);
         }

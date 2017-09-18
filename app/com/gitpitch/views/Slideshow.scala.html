@@ -1,6 +1,6 @@
 @import com.gitpitch.views.html.frags._
 
-@(ssm: com.gitpitch.models.SlideshowModel, deps: com.gitpitch.policies.Dependencies, printing: Boolean, offline: Boolean, webPrinting: Boolean)
+@(ssm: com.gitpitch.models.SlideshowModel, deps: com.gitpitch.policies.Dependencies, offline: Boolean, serverPrinting: Boolean, webPrinting: Boolean)
 
 <!DOCTYPE html>
 <html>
@@ -16,7 +16,9 @@
     }
     <link rel="icon" href="@deps.gitpitchimg(offline)/favicon.ico"/>
     <link href="@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/reveal.css" rel="stylesheet" type="text/css"/>
-    <link href="@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/@ssm.fetchThemeCSS()" rel="stylesheet" type="text/css"/>
+    <link href="@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/@ssm.fetchThemeCSS()" rel="stylesheet" type="text/css" id="theme"/>
+
+    <link href="@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/plugin/title-footer/title-footer.css" rel="stylesheet" type="text/css" id="theme"/>
     @if(webPrinting) {
     <link href="@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/print/pdf.css" rel="stylesheet" type="text/css"/>
     } else {
@@ -25,6 +27,7 @@
     <link href="@deps.highlightjs(offline)/@ssm.fetchHighlightCSS()" rel="stylesheet" type="text/css"/>
     <link href="@deps.octicons(offline)/octicons.css" rel="stylesheet" type="text/css"/>
     <link href="@deps.fontawesome(offline)/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+
     @SlideshowStyle()
     @SlideshowCodeFragHighlightStyle()
     @if(ssm.hasThemeOverride()) {
@@ -34,7 +37,7 @@
     }
 
     @if(!offline) {
-        @if(!printing) {
+        @if(!serverPrinting) {
             @if(ssm.hasGAToken()) {
                 @GoogleAnalytics(ssm.fetchGAToken())
             }
@@ -52,6 +55,8 @@
         }
     </div>
     }
+
+    @if(serverPrinting || webPrinting) {
     <div style="position: fixed; bottom: 10px; left: 20px; z-index: 999">
         @if(ssm.hasFootnote()) {
         <span style="color:@ssm.fetchThemeFontColorInverse(); font-size:0.8em; font-family: @ssm.fetchThemeFont();">@Html(ssm.fetchFootnote())</span>
@@ -76,6 +81,7 @@
             <span style="color:@ssm.fetchThemeFontColorInverse(); font-size:0.8em; font-family: @ssm.fetchThemeFont();">@ssm.params().asLogo()</span>
         }
     </div>
+    }
 
     <div class="reveal">
         <div class="slides">
@@ -95,12 +101,16 @@
             </section>
             }
         </div>
+
+        <footer id="title-footer"><p id="notification"></p></footer>
+
     </div>
+
     <script src="@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/js/reveal.js"></script>
     <script src="@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/lib/js/head.min.js"></script>
     <script src="@deps.jquery(offline)/jquery.min.js"></script>
 
-    @SlideshowReveal(ssm, deps, printing, offline)
+    @SlideshowReveal(ssm, deps, offline, serverPrinting, webPrinting)
 
     <script>
         @if(ssm.fixedTheme()) {
@@ -108,6 +118,11 @@
             window.parent.postMessage("FIXEDTHEME", '*');
         });
         }
+
+        function setNotification(msg) {
+          var notification = document.getElementById('notification')
+          notification.innerHTML = msg;
+        };
     </script>
 </body>
 </html>

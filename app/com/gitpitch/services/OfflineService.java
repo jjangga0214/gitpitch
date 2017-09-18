@@ -271,7 +271,7 @@ public class OfflineService {
                         pp.theme,
                         pp.pitchme,
                         pp.notes,
-                        ENABLED)
+                        ENABLED, null, null)
                         .absoluteURL(isEncrypted(), hostname());
 
         return diskService.download(pp, zipRoot,

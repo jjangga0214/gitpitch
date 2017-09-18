@@ -466,6 +466,36 @@ public class SlideshowModel {
         return _cacheKey;
     }
 
+    public String homePanel(Boolean offline) {
+        return com.gitpitch.controllers.routes.PitchController.home(_pp.grs,
+                _pp.user,
+                _pp.repo,
+                _pp.branch,
+                _pp.theme,
+                _pp.pitchme,
+                Boolean.toString(offline)).toString();
+    }
+
+    public String gitPanel() {
+        return com.gitpitch.controllers.routes.PitchController.git(_pp.grs,
+                _pp.user,
+                _pp.repo,
+                _pp.branch,
+                _pp.theme,
+                _pp.pitchme,
+                null).toString();
+    }
+
+    public String themesPanel() {
+        return com.gitpitch.controllers.routes.PitchController.themes(_pp.grs,
+                _pp.user,
+                _pp.repo,
+                _pp.branch,
+                _pp.theme,
+                _pp.pitchme,
+                null).toString();
+    }
+
     private String buildSlideDelim(String pattern) {
 
         log.debug("buildSlideDelim: pattern={}", pattern);
@@ -503,10 +533,10 @@ public class SlideshowModel {
     private static Map<String, String> LOGO_POSITIONS =
             Collections.unmodifiableMap(new HashMap<String, String>() {
                 {
-                    put("top-left", "position: fixed; top: 20px; left: 20px; z-index: 999");
-                    put("top-right", "position: fixed; top: 20px; right: 20px; z-index: 999");
-                    put("bottom-left", "position: fixed; bottom: 20px; left: 20px; z-index: 999");
-                    put("bottom-right", "position: fixed; bottom: 20px; right: 20px; z-index: 999");
+                    put("top-left", "position: fixed; top: 20px; left: 20px; z-index: 1");
+                    put("top-right", "position: fixed; top: 20px; right: 20px; z-index: 1");
+                    put("bottom-left", "position: fixed; bottom: 20px; left: 20px; z-index: 1");
+                    put("bottom-right", "position: fixed; bottom: 20px; right: 20px; z-index: 1");
                 }
             });
 }

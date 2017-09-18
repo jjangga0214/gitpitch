@@ -191,6 +191,11 @@ public class PitchParams {
                 .toString();
     }
 
+    public String atPretty() {
+      String pretty = pretty().substring(1);
+      return new StringBuffer(AT).append(pretty).toString();
+    }
+
     public String toString() {
         return new StringBuffer(SLASH).append(grs)
                 .append(SLASH)

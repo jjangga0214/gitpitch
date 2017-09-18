@@ -1,4 +1,4 @@
-@(ssm: com.gitpitch.models.SlideshowModel, deps: com.gitpitch.policies.Dependencies, printing: Boolean, offline: Boolean)
+@(ssm: com.gitpitch.models.SlideshowModel, deps: com.gitpitch.policies.Dependencies, offline:Boolean, serverPrinting: Boolean, webPrinting: Boolean)
 
     <script>
         Reveal.initialize({
@@ -7,13 +7,22 @@
             showNotes: @ssm.showNotes(),
             transition: '@ssm.fetchTransition()',
             backgroundTransition: '@ssm.fetchTransition()',
-            autoSlide: @ssm.fetchAutoSlide(printing),
+            @if(!(serverPrinting || webPrinting)) {
+              autoSlide: @ssm.fetchAutoSlide(false),
+            } else {
+              autoSlide: 0,
+            }
             loop: @ssm.fetchLoop(),
             center: @ssm.fetchVerticalCenter(),
             rtl: @ssm.fetchRTL(),
             shuffle: @ssm.fetchShuffle(),
             mouseWheel: @ssm.fetchMouseWheel(),
-            slideNumber: @ssm.fetchSlideNumber(),
+            @if(!(serverPrinting || webPrinting)) {
+              // slideNumber: @ssm.fetchSlideNumber(),
+              slideNumber: 'c/t',
+            } else {
+              slideNumber: false,
+            }
             history: @ssm.fetchHistory(),
             @if(ssm.mathEnabled()) {
                 math: {
@@ -25,9 +34,50 @@
                     config: '@ssm.fetchMathConfig()'
                 },
             }
+            @if(!(serverPrinting || webPrinting)) {
+            menu: {
+              themes: [
+                { name: 'Black', theme: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/black.css' },
+                { name: 'White', theme: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/white.css' },
+                // { name: 'League', theme: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/league.css' },
+                { name: 'Sky', theme: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/sky.css' },
+                { name: 'Beige', theme: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/beige.css' },
+                // { name: 'Simple', theme: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/simple.css' },
+                // { name: 'Serif', theme: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/serif.css' },
+                // { name: 'Blood', theme: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/blood.css' },
+                { name: 'Night', theme: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/night.css' },
+                { name: 'Moon', theme: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/moon.css' }
+                // { name: 'Solarized', theme: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/css/theme/solarized.css' }
+              ],
+              // themes : false,
+              custom: [
+                @if(offline) {
+                { title: 'Home', active: true, icon: '<i class="fa fa-bookmark">', src: '@ssm.homePanel(offline)' }
+                } else {
+                { title: 'Home', active: true, icon: '<i class="fa fa-bookmark">', src: '@ssm.homePanel(offline)' },
+                { title: 'Themes', icon: '<i class="fa fa-code-fork">', src: '@ssm.gitPanel()' },
+                { title: 'GRS', icon: '<i class="fa fa-image">', src: '@ssm.themesPanel()' }
+                }
+              ],
+              // custom: false,
+              transitions:  false,
+              sticky: false,
+              autoOpen: false,
+              markers: true,
+              sticky: true,
+              autoOpen: true
+            },
+            }
             dependencies: [
                 { src: "@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/plugin/markdown/marked.js"},
                 { src: "@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/plugin/markdown/markdown.js"},
+                @if(!(serverPrinting || webPrinting)) {
+                { src: "@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/plugin/menu/menu.js", async: true},
+                /*
+                { src: '@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/plugin/title-footer/title-footer.js',
+                  async: true, callback: function() { title_footer.initialize("@ssm.fetchFootnote()"); }},
+                */
+                }
                 @if(ssm.chartsEnabled()) {
                 { src: "@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/plugin/chart/Chart.min.js"},
                 { src: "@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/plugin/chart/csv2chart.js"},
@@ -49,6 +99,32 @@
                     { src: "@deps.revealjs(offline, ssm.fetchRevealVersionOverride())/plugin/math/math.js", async: true }
                 }
             ]
+        });
+
+        Reveal.addEventListener('ready', function(evt) {
+          console.log("slidechanged: event indexh=" + evt.indexh + ", indexv=" + evt.indexv);
+          if (evt.indexh === 0 && evt.indexv === 0) {
+            setNotification("Navigate : Space / Arrows | <a href='#' onclick='RevealMenu.openMenu()'>M</a> - Menu | <a href='#' onclick='enterFullscreen()'>F</a> - Fullscreen | <a href='#' onclick='enterOverview()'>O</a> - Overview | <a href='#' onclick='enterOverview()'>S</a> - Speaker | <a href='#' onclick='Reveal.enterHelp()'>?</a> - Help");
+          } else {
+            @if(ssm.hasFootnote()) {
+              setNotification("@Html(ssm.fetchFootnote())");
+            } else {
+              setNotification("[ GitPitch @Html(ssm.params().atPretty()) ]");
+            }
+          }
+        });
+
+        Reveal.addEventListener('slidechanged', function(evt) {
+          console.log("slidechanged: event indexh=" + evt.indexh + ", indexv=" + evt.indexv);
+          if (evt.indexh === 0 && evt.indexv === 0) {
+            setNotification("Navigate : Space / Arrows | <a href='#' onclick='RevealMenu.openMenu()'>M</a> - Menu | <a href='#' onclick='enterFullscreen()'>F</a> - Fullscreen | <a href='#' onclick='enterOverview()'>O</a> - Overview | <a href='#' onclick='enterOverview()'>S</a> - Speaker | <a href='#' onclick='Reveal.enterHelp()'>?</a> - Help");
+          } else {
+            @if(ssm.hasFootnote()) {
+              setNotification("@Html(ssm.fetchFootnote())");
+            } else {
+              setNotification("[ GitPitch @Html(ssm.params().atPretty()) ]");
+            }
+          }
         });
 
         Reveal.configure({
@@ -83,6 +159,10 @@
         function enterBlackout() {
             Reveal.togglePause();
         };
+
+        function enterHelp() {
+          Reveal.toggleHelp();
+        }
 
         function enableEvents() {
             Reveal.addEventListeners();

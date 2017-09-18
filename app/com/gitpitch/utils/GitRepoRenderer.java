@@ -2,17 +2,17 @@
  * MIT License
  *
  * Copyright (c) 2016 David Russell
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -89,7 +89,7 @@ public class GitRepoRenderer {
                             _pp.grs,
                             _pp.theme,
                             _pp.pitchme,
-                            _pp.notes, null).toString();
+                            _pp.notes, null, null, null).toString();
 
             this._slideshowURL = com.gitpitch.controllers.routes.PitchController
                     .slideshow(_pp.grs,
@@ -243,6 +243,13 @@ public class GitRepoRenderer {
     }
 
     /*
+     * Return pitch slideshow grs.
+     */
+    public String grs() {
+        return _pp.grs;
+    }
+
+    /*
      * Return true is branch is GIT_MASTER.
      */
     public boolean isMaster() {
@@ -273,7 +280,7 @@ public class GitRepoRenderer {
                 _pp.grs,
                 theme,
                 _pp.pitchme,
-                _pp.notes, null).toString();
+                _pp.notes, null, null, null).toString();
     }
 
     /*
@@ -287,7 +294,7 @@ public class GitRepoRenderer {
                 _pp.grs,
                 _pp.theme,
                 _pp.pitchme,
-                _pp.notes, null).absoluteURL(isEncrypted(),
+                _pp.notes, null, null, null).absoluteURL(isEncrypted(),
                             hostname());
     }
 
@@ -405,7 +412,7 @@ public class GitRepoRenderer {
                     _pp.theme,
                     _pp.pitchme,
                     _pp.notes,
-                    null)
+                    null, null, null)
                     .absoluteURL(isEncrypted(),
                             hostname());
         else
@@ -415,7 +422,7 @@ public class GitRepoRenderer {
                     grs,
                     _pp.theme,
                     _pp.pitchme,
-                    _pp.notes, null).toString();
+                    _pp.notes, null, null, null).toString();
     }
 
     public String pageLinkWithTheme(String theme) {
@@ -427,7 +434,7 @@ public class GitRepoRenderer {
                 theme,
                 _pp.pitchme,
                 _pp.notes,
-                null).toString();
+                null, null, null).toString();
     }
 
     public String printLink() {
@@ -443,10 +450,10 @@ public class GitRepoRenderer {
 
     public String printBrowserLink() {
 
-        return com.gitpitch.controllers.routes.PitchController.slideshow(_pp.grs,
-                _pp.user,
+        return com.gitpitch.controllers.routes.PitchController.landing(_pp.user,
                 _pp.repo,
                 _pp.branch,
+                _pp.grs,
                 _pp.theme,
                 _pp.pitchme,
                 _pp.notes,
@@ -496,6 +503,9 @@ public class GitRepoRenderer {
         return _grsServices;
     }
 
+    public List<String> listThemes() {
+      return _cfg.getStringList("gitpitch.revealjs.themes");
+    }
 
     public String pageDescription() {
         if(model() != null && model().description() != null) {
