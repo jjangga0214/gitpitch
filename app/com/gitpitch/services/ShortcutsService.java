@@ -2,17 +2,17 @@
  * MIT License
  *
  * Copyright (c) 2016 David Russell
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -61,6 +61,17 @@ public class ShortcutsService {
             }
         }
         return found;
+    }
+
+    public boolean titleHintFound(String md) {
+      boolean found = false;
+      if(md != null) {
+          String trimmed = md.trim();
+          if(trimmed.startsWith(MarkdownModel.MD_TITLE_HINT_OPEN)) {
+              found = true;
+          }
+      }
+      return found;
     }
 
     /*
@@ -113,6 +124,36 @@ public class ShortcutsService {
     }
 
     /*
+     * Expand title-hint shortcut syntax into corresponding
+     * HTML hidden span for detection by menu.js.
+     */
+    public String expandTitleHint(String md) {
+
+        try {
+
+            int hintStart =
+                md.indexOf(MarkdownModel.MD_TITLE_HINT_OPEN) +
+                    MarkdownModel.MD_TITLE_HINT_OPEN.length();
+            int hintEnd =
+                md.indexOf(MarkdownModel.MD_TITLE_HINT_CLOSE);
+
+            if(hintEnd > hintStart) {
+                String hint = md.substring(hintStart, hintEnd);
+                md =  new StringBuffer(MarkdownModel.MD_SPACER)
+                          .append(TITLE_HINT_SPAN_OPEN)
+                          .append(hint)
+                          .append(TITLE_HINT_SPAN_CLOSE)
+                          .append(MarkdownModel.MD_SPACER)
+                          .toString();
+            }
+
+        } catch(Exception cfex) {
+        } finally {
+            return md;
+        }
+    }
+
+    /*
      * Construct a HTML fragment for a code fragment based on the
      * reveal-code-focus plugin syntax:
      * <span class="fragment current-only" data-code-focus="1-9">Note</span>
@@ -138,4 +179,7 @@ public class ShortcutsService {
         "<span class=\"fragment current-only\" data-code-focus=\"";
     private static final String HTML_CODE_FRAG_CLOSE = "\">";
     private static final String HTML_CODE_FRAG_NOTE_CLOSE = "</span>";
+    private static final String TITLE_HINT_SPAN_OPEN =
+        "<span class=\"menu-title\" style=\"display: none\">";
+    private static final String TITLE_HINT_SPAN_CLOSE = "</span>";
 }

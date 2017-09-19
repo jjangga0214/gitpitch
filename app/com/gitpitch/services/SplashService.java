@@ -67,6 +67,6 @@ public class SplashService {
     private static final String SPLASH_LOGO_SIZE =
       "data-background-size='40%'>";
     private static final String SPLASH_TOC =
-      "<span class='menu-title' style='display: none'>GitPitch Intro</span>";
+      "<span class='menu-title' style='display: none'>GitPitch</span>";
     private static final String SPLASH_CLOSE = "</section>";
 }
