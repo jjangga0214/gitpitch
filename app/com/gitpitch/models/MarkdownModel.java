@@ -30,6 +30,7 @@ import com.gitpitch.services.VideoService;
 import com.gitpitch.services.GISTService;
 import com.gitpitch.services.CodeService;
 import com.gitpitch.services.ShortcutsService;
+import com.gitpitch.services.SplashService;
 import com.gitpitch.git.GRSManager;
 import org.apache.commons.io.FilenameUtils;
 import com.google.inject.assistedinject.Assisted;
@@ -57,6 +58,7 @@ public class MarkdownModel implements Markdown {
     private final GISTService  gistService;
     private final CodeService  codeService;
     private final ShortcutsService shortcutsService;
+    private final SplashService splashService;
     private final GRSManager grsManager;
     private final MarkdownRenderer mrndr;
     private final String markdown;
@@ -69,6 +71,7 @@ public class MarkdownModel implements Markdown {
                          GISTService  gistService,
                          CodeService  codeService,
                          ShortcutsService  shortcutsService,
+                         SplashService splashService,
                          GRSManager grsManager,
                          @Nullable @Assisted MarkdownRenderer mrndr) {
 
@@ -77,6 +80,7 @@ public class MarkdownModel implements Markdown {
         this.gistService  = gistService;
         this.codeService  = codeService;
         this.shortcutsService = shortcutsService;
+        this.splashService = splashService;
         this.grsManager = grsManager;
         this.mrndr = mrndr;
 
@@ -561,6 +565,9 @@ public class MarkdownModel implements Markdown {
                 md = slimMd;
             }
         }
+
+        md = splashService.build(md, yOpts, horizDelim());
+
         return md;
     }
 

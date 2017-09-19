@@ -119,10 +119,31 @@
         });
         }
 
-        function setNotification(msg) {
+        function pushNotification(msg) {
           var notification = document.getElementById('notification')
           notification.innerHTML = msg;
         };
+
+        function pushHelpNotification() {
+          pushNotification("<span class='footer-help'>Navigate : Space / Arrow Keys | <a href='#' onclick='RevealMenu.toggle()'>M</a> - Menu | <a href='#' onclick='enterFullscreen()'>F</a> - Fullscreen | <a href='#' onclick='enterOverview()'>O</a> - Overview | <a href='#' onclick='enterBlackout()'>B</a> - Blackout | <a href='#' onclick='RevealNotes.open()'>S</a> - Speaker | <a href='#' onclick='enterHelp()'>?</a> - Help</span>");
+
+        }
+
+        function pushFootnoteNotification() {
+          @if(ssm.hasFootnote()) {
+            pushNotification("@Html(ssm.fetchFootnote())");
+          } else {
+            pushNotification("[ GitPitch @Html(ssm.params().atPretty()) ]");
+          }
+        }
+
+        function pushCodePresentingStepNotification(step, frags) {
+          pushNotification("CODE PRESENTING - Step " + step + " / " + frags);
+        }
+
+        window.addEventListener("codepresenting", function(evt) {
+            console.log("codepresenting: event received=" + evt);
+        }, false);
     </script>
 </body>
 </html>

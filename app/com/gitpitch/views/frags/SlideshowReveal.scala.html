@@ -102,28 +102,18 @@
         });
 
         Reveal.addEventListener('ready', function(evt) {
-          console.log("slidechanged: event indexh=" + evt.indexh + ", indexv=" + evt.indexv);
           if (evt.indexh === 0 && evt.indexv === 0) {
-            setNotification("Navigate : Space / Arrows | <a href='#' onclick='RevealMenu.openMenu()'>M</a> - Menu | <a href='#' onclick='enterFullscreen()'>F</a> - Fullscreen | <a href='#' onclick='enterOverview()'>O</a> - Overview | <a href='#' onclick='enterOverview()'>S</a> - Speaker | <a href='#' onclick='Reveal.enterHelp()'>?</a> - Help");
+            pushHelpNotification();
           } else {
-            @if(ssm.hasFootnote()) {
-              setNotification("@Html(ssm.fetchFootnote())");
-            } else {
-              setNotification("[ GitPitch @Html(ssm.params().atPretty()) ]");
-            }
+            pushFootnoteNotification();
           }
         });
 
         Reveal.addEventListener('slidechanged', function(evt) {
-          console.log("slidechanged: event indexh=" + evt.indexh + ", indexv=" + evt.indexv);
           if (evt.indexh === 0 && evt.indexv === 0) {
-            setNotification("Navigate : Space / Arrows | <a href='#' onclick='RevealMenu.openMenu()'>M</a> - Menu | <a href='#' onclick='enterFullscreen()'>F</a> - Fullscreen | <a href='#' onclick='enterOverview()'>O</a> - Overview | <a href='#' onclick='enterOverview()'>S</a> - Speaker | <a href='#' onclick='Reveal.enterHelp()'>?</a> - Help");
+            pushHelpNotification();
           } else {
-            @if(ssm.hasFootnote()) {
-              setNotification("@Html(ssm.fetchFootnote())");
-            } else {
-              setNotification("[ GitPitch @Html(ssm.params().atPretty()) ]");
-            }
+            pushFootnoteNotification();
           }
         });
 
