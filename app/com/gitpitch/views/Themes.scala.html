@@ -1,4 +1,7 @@
-@(rndr: com.gitpitch.utils.GitRepoRenderer, deps: com.gitpitch.policies.Dependencies, offline: Boolean)
+@(rndr: com.gitpitch.utils.GitRepoRenderer,
+  deps: com.gitpitch.policies.Dependencies,
+  fixedTheme: String,
+  offline: Boolean)
 <!DOCTYPE html>
 <!--[if lt IE 7]>
 <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -135,14 +138,20 @@
 
       <ul class="slide-menu-items slide-menu-boxed">
         @for(theme <- rndr.listThemes()) {
-          @if(theme == rndr.theme()) {
-          <li class="home-themes slide-menu-item selected">
-            <a class="active" href='@rndr.pageLinkWithTheme(theme)'>@theme</a>
-          </li>
-          } else {
-          <li class="home-themes slide-menu-item">
-            <a href='@rndr.pageLinkWithTheme(theme)'>@theme</a>
-          </li>
+          @if(theme == fixedTheme || (fixedTheme == null && theme == rndr.theme())) {
+            <li class="home-themes slide-menu-item selected">
+              <a class="active" href='@rndr.pageLinkWithTheme(theme)'>@theme</a>
+            </li>
+            } else {
+            @if(fixedTheme != null)  {
+            <li class="home-themes slide-menu-item disabled">
+              <a href='@rndr.pageLinkWithTheme(theme)'>@theme</a>
+            </li>
+            } else {
+            <li class="home-themes slide-menu-item">
+              <a href='@rndr.pageLinkWithTheme(theme)'>@theme</a>
+            </li>
+            }
           }
         }
       </ul>
@@ -151,15 +160,20 @@
 
       <hr class="fade-away">
 
+      <br>
+      @if(fixedTheme != null) {
+      <p style="letter-spacing: 2px">
+        <a href="https://github.com/gitpitch/gitpitch/wiki/Slideshow-Settings">PITCHME.yaml</a>
+        <br>Fixed theme in use.
+      </p>
+
+      } else {
+      <p style="letter-spacing: 2px">
+        Use <a href="https://github.com/gitpitch/gitpitch/wiki">PITCHME.yaml</a> To
+        <br>Customize Everything ;-)
+      </p>
+      }
       <br><br>
-
-      <div>
-        <span class="orange">Tip! </span>
-        Use <b>PITCHME.yaml</b> to set a fixed theme for your slideshow.
-      </div>
-
-      <br><br>
-
 
     </div>
 

@@ -30,7 +30,6 @@
 	display: block;
 	text-align: left;
 	padding: 10px 18px;
-	# color: #aaa;
 	# color: #004460;
 	color: gray;
 	cursor: pointer;
@@ -48,6 +47,14 @@
 	background-color: #222;
 	color: white;
 }
+
+.reveal .active-menu-panel li.disabled {
+	text-decoration: line-through;
+	opacity: 0.3;
+	color: white;
+	background-color: black;
+}
+
 
 .reveal .active-menu-panel li.active {
 	# color: #eee;
@@ -205,7 +212,7 @@
 }
 
 .reveal .slide-menu-panel p {
-	margin: 10px 0 5px 0;
+	margin: 2px 0 1px 0;
 }
 
 .reveal .slide-menu-panel a {

@@ -128,72 +128,6 @@ public class PitchController extends Controller {
     /*
      * Landing builds and renders a GitPitch repo landing page.
      */
-    public CompletionStage<Result> Xlanding(String user,
-                                           String repo,
-                                           String branch,
-                                           String grs,
-                                           String theme,
-                                           String pitchme,
-                                           String notes,
-                                           String offline) {
-
-        PitchParams pp =
-            PitchParams.build(grsOnCall(grs),
-                    user, repo, branch, theme, pitchme, notes);
-        boolean isOffline =
-                (offline == null) ? false : Boolean.parseBoolean(offline);
-        Optional<GitRepoModel> grmo = pitchService.cachedRepo(pp);
-
-        if (grmo.isPresent()) {
-
-            if (isOffline)
-                log.info("landing:   [ cached, offlne ] {}", pp);
-            else
-                log.info("landing:   [ cached, online ] {}", pp);
-
-            GitRepoModel grm = grmo.get();
-            GitRepoRenderer rndr =
-                GitRepoRenderer.build(pp, grm, cfg, grsManager.listGRS());
-
-            return CompletableFuture.completedFuture(
-                    ok(com.gitpitch.views.html.Landing.render(rndr,
-                            deps, isOffline, gaToken)));
-
-        } else {
-
-            return CompletableFuture.supplyAsync(() -> {
-
-                return pitchService.fetchRepo(pp);
-
-            }, frontEndThreads.POOL)
-                    .thenApply(fetched -> {
-
-                        GitRepoRenderer rndr =
-                            GitRepoRenderer.build(pp, fetched, cfg,
-                                    grsManager.listGRS());
-
-                        if (rndr.isValid()) {
-                            if (isOffline)
-                                log.info("landing:   [ fetchd, offlne ] {}", pp);
-                            else
-                                log.info("landing:   [ fetchd, online ] {}", pp);
-                        } else {
-                            if (isOffline)
-                                log.info("landing:   [ notfnd, offlne ] {}", pp);
-                            else
-                                log.info("landing:   [ notfnd, online ] {}", pp);
-                        }
-
-                        return ok(com.gitpitch.views.html.Landing.render(rndr,
-                                deps, isOffline, gaToken));
-                    });
-        }
-
-    } // landing action
-
-    /*
-     * Landing builds and renders a GitPitch repo landing page.
-     */
     public CompletionStage<Result> landing(String user,
                                            String repo,
                                            String branch,
@@ -503,13 +437,18 @@ public class PitchController extends Controller {
                 (offline == null) ? false : Boolean.parseBoolean(offline);
 
         Optional<GitRepoModel> grmo = pitchService.cachedRepo(pp);
+        Optional<SlideshowModel> ssmo = pitchService.cachedYAML(pp);
 
         GitRepoModel grm = grmo.orElse(null);
         GitRepoRenderer rndr =
                 GitRepoRenderer.build(pp, grm, cfg, grsManager.listGRS());
+        String fixedTheme = null;
+        if(ssmo.isPresent()) {
+          fixedTheme = ssmo.get().fixedTheme() ? ssmo.get().fetchTheme() : null;
+        }
 
         return CompletableFuture.completedFuture(
-                ok(com.gitpitch.views.html.Themes.render(rndr, deps, isOffline)));
+                ok(com.gitpitch.views.html.Themes.render(rndr, deps, fixedTheme, isOffline)));
 
     } // themes action
 
