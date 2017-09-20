@@ -62,7 +62,7 @@ public class SplashService {
     private static final String SPLASH_OPEN =
       "<section data-background-color='black' data-background-image=\"";
     private static final String SPLASH_LOGO_URL =
-      "https://gitpitch.com/splash-logo-alt-geek.svg";
+      "https://gitpitch.com/gp-splash.svg";
     private static final String SPLASH_PAD = "\" ";
     private static final String SPLASH_LOGO_SIZE =
       "data-background-size='40%'>";

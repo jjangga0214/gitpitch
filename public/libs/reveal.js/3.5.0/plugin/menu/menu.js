@@ -228,13 +228,9 @@ var RevealMenu = window.RevealMenu || (function(){
 							break;
 						// space, return
 						case 32: case 13:
-							console.log("space and/or return key has been pressed.")
 							var currItem = select('.active-menu-panel .slide-menu-items li.selected');
-							console.log("currItem=" + currItem);
 							if (currItem) {
 								openItem(currItem, true);
-							} else {
-								console.log("currItem is null");
 							}
 							break;
 						// esc
@@ -299,12 +295,8 @@ var RevealMenu = window.RevealMenu || (function(){
 			}
 
 			function closeMenu(event, force) {
-				console.log("closeMenu called, event=" + event);
-				console.log("closeMenu called, force=" + force);
-				console.log("closeMenu called, sticky=" + sticky);
 				if (event) event.preventDefault();
 				if (!sticky || force || event instanceof MouseEvent) {
-					console.log("closeMenu called, closing...");
 					select('body').classList.remove('slide-menu-active');
 					select('.reveal').classList.remove('has-' + options.effect + '-' + side);
 					select('.slide-menu').classList.remove('active');
@@ -699,8 +691,16 @@ var RevealMenu = window.RevealMenu || (function(){
 					});
 				}
 
-				// TODO:DMR auto-open menu panel
-				// openMenu();
+				/*
+				 * The menu should only be opened by default on the main
+				 * presentation window.
+				 *
+				 * Receiver on window.location indicates the speaker-notes
+				 * window. The menu should be closed for this speaker window.
+				 */
+				if(!window.location.search.match(/receiver/gi)) {
+					openMenu();
+				}
 
 				initialised = true;
 			}

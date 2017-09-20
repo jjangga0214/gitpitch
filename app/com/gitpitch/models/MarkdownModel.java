@@ -568,8 +568,6 @@ public class MarkdownModel implements Markdown {
             }
         }
 
-        md = splashService.build(md, yOpts, horizDelim());
-
         return md;
     }
 
